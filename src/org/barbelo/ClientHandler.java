@@ -8,8 +8,6 @@ public class ClientHandler {
 	private SocketConnection	_s;
 	private DataOutputStream	_os;
 
-	private static final int CMD_COORDINATES = 0;
-
 	public ClientHandler(Server server, SocketConnection s) throws Exception
 	{
 		_server = server;
@@ -27,16 +25,9 @@ public class ClientHandler {
 		}
 	}
 
-	public synchronized void set_coordinates(double latitude,
-						 double longitude)
-							throws Exception
+	public synchronized void update_location(String nmea) throws Exception
 	{
-		String msg = "" + CMD_COORDINATES 
-			     + " " + latitude
-			     + " " + longitude
-			     + "\n";
-
-		byte[] crap = msg.getBytes("UTF-8");
+		byte[] crap = nmea.getBytes("UTF-8");
 		_os.write(crap);
 		_os.flush();
 	}

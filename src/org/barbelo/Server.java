@@ -10,16 +10,12 @@ public class Server extends Thread {
 	private boolean			_running;
 	private ServerSocketConnection	_sock;
 	private Vector			_clients;
-	private double			_latitude;
-	private double			_longitude;
 
 	public Server(GPSd gpsd)
 	{
 		_gpsd    = gpsd;
 		_running = true;
 		_clients = new Vector();
-
-		_latitude = _longitude = 0;
 	}
 
 	private synchronized boolean running()
@@ -43,18 +39,15 @@ public class Server extends Thread {
 		}
 	}
 
-	public void set_coordinates(double latitude, double longitude)
+	public void update_location(String nmea)
 	{
-		_latitude = latitude;
-		_longitude = longitude;
-
 		boolean recount = false;
 
 		for (int i = 0; i < _clients.size(); i++) {
 			ClientHandler c = (ClientHandler) _clients.elementAt(i);
 
 			try {
-				c.set_coordinates(_latitude, _longitude);
+				c.update_location(nmea);
 			} catch (Exception e) {
 				c.kill();
 				_clients.removeElementAt(i);
@@ -95,12 +88,7 @@ public class Server extends Thread {
 		ClientHandler c = null;
 		try {
 			c = new ClientHandler(this, s);
-			c.set_coordinates(_latitude, _longitude);
-
 		} catch (Exception e) {
-			if (c != null)
-				c.kill();
-
 			return;
 		}
 

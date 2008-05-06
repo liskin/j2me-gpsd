@@ -84,12 +84,13 @@ public class GPSd extends MIDlet implements CommandListener {
 		_debug.setText(msg);
 	}
 
-	public void set_coordinates(double latitude, double longitude)
+	public void update_location(double latitude, double longitude,
+				    String nmea)
 	{
 		_latitude.setText((new Double(latitude)).toString());
 		_longitude.setText((new Double(longitude)).toString());
 
-		_server.set_coordinates(latitude, longitude);
+		_server.update_location(nmea);
 	}
 
 	public void set_clients(int clients)
