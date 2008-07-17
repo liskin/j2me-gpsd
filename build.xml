@@ -7,7 +7,7 @@
 	<property name="jar"	location="${cname}.jar" />
 	<property name="manifest"  value="manifest.mf" />
 	<property name="debug"	   value="false" />
-	<property name="j2me"	location="/root/WTK2.5.2" />
+	<property name="j2me"	location="/home/tomi/bin/WTK2.5.2/" />
 	<property name="output"	location="output" />
 
 	<path id="j2me.path">
