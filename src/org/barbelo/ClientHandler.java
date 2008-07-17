@@ -4,13 +4,11 @@ import javax.microedition.io.*;
 import java.io.*;
 
 public class ClientHandler {
-	private Server			_server;
 	private SocketConnection	_s;
 	private DataOutputStream	_os;
 
-	public ClientHandler(Server server, SocketConnection s) throws Exception
+	public ClientHandler(SocketConnection s) throws Exception
 	{
-		_server = server;
 		_s      = s;
 		_os     = _s.openDataOutputStream();
 	}

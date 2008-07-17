@@ -87,7 +87,7 @@ public class Server extends Thread {
 
 		ClientHandler c = null;
 		try {
-			c = new ClientHandler(this, s);
+			c = new ClientHandler(s);
 		} catch (Exception e) {
 			return;
 		}
