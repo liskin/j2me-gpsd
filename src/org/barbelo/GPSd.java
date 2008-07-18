@@ -2,6 +2,7 @@ package org.barbelo;
 
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.*;
+import java.util.Vector;
 
 public class GPSd extends MIDlet implements CommandListener {
 	private Form		_form;
@@ -11,7 +12,7 @@ public class GPSd extends MIDlet implements CommandListener {
 	private StringItem	_latitude;
 	private StringItem	_longitude;
 	private StringItem	_clients;
-	private Server		_server;
+	private Vector		_servers = new Vector();
 
 	private static final String HIDE = "Hide";
 
@@ -35,7 +36,8 @@ public class GPSd extends MIDlet implements CommandListener {
 		_form.append(_debug);
 
 		_gps    = new GPS(this);
-		_server = new Server(this);
+		_servers.addElement(new SockServer(this));
+		_servers.addElement(new BTServer(this));
 	}
 
 	public void startApp()
@@ -43,7 +45,11 @@ public class GPSd extends MIDlet implements CommandListener {
 		Display.getDisplay(this).setCurrent(_form);
 
 		_gps.start();
-		_server.start();
+		for (int i = 0; i < _servers.size(); i++) {
+			Server s = (Server) _servers.elementAt(i);
+
+			s.start();
+		}
 	}
 
 	public void pauseApp()
@@ -63,11 +69,15 @@ public class GPSd extends MIDlet implements CommandListener {
 
 		_gps.stop();
 
-		_server.stop();
-		_server.interrupt();
-		try {
-			_server.join();
-		} catch (InterruptedException e) {
+		for (int i = 0; i < _servers.size(); i++) {
+			Server s = (Server) _servers.elementAt(i);
+
+			s.stop();
+			s.interrupt();
+			try {
+				s.join();
+			} catch (InterruptedException e) {
+			}
 		}
 
 		destroyApp(false);
@@ -90,11 +100,23 @@ public class GPSd extends MIDlet implements CommandListener {
 		_latitude.setText((new Double(latitude)).toString());
 		_longitude.setText((new Double(longitude)).toString());
 
-		_server.update_location(nmea);
+		for (int i = 0; i < _servers.size(); i++) {
+			Server s = (Server) _servers.elementAt(i);
+
+			s.update_location(nmea);
+		}
 	}
 
-	public void set_clients(int clients)
+	public void update_client_count()
 	{
+		int clients = 0;
+
+		for (int i = 0; i < _servers.size(); i++) {
+			Server s = (Server) _servers.elementAt(i);
+
+			clients += s.client_count();
+		}
+
 		_clients.setText((new Integer(clients)).toString());
 	}
 }

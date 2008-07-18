@@ -3,12 +3,10 @@ package org.barbelo;
 import javax.microedition.io.*;
 import java.util.*;
 
-public class Server extends Thread {
-	private static final int PORT = 666;
-
+public abstract class Server extends Thread {
 	private GPSd			_gpsd;
 	private boolean			_running;
-	private ServerSocketConnection	_sock;
+	private StreamConnectionNotifier	_sock;
 	private Vector			_clients;
 
 	public Server(GPSd gpsd)
@@ -57,14 +55,15 @@ public class Server extends Thread {
 		}
 
 		if (recount)
-			client_count();
+			_gpsd.update_client_count();
 	}
+
+	abstract StreamConnectionNotifier init() throws Exception;
 
 	public void run()
 	{
 		try {
-			_sock = (ServerSocketConnection) 
-				Connector.open("socket://:" + PORT);
+			_sock = init();
 		} catch (Exception e) {
 			_gpsd.exception(e);
 			return;
@@ -77,10 +76,10 @@ public class Server extends Thread {
 
 	private void run_do()
 	{
-		SocketConnection s = null;
+		StreamConnection s = null;
 
 		try {
-			s = (SocketConnection) _sock.acceptAndOpen();
+			s = (StreamConnection) _sock.acceptAndOpen();
 		} catch (Exception e) {
 			return;
 		}
@@ -93,13 +92,11 @@ public class Server extends Thread {
 		}
 
 		_clients.addElement(c);
-		client_count();
+		_gpsd.update_client_count();
 	}
 
-	private void client_count()
+	public int client_count()
 	{
-		int clients = _clients.size();
-
-		_gpsd.set_clients(clients);
+		return _clients.size();
 	}
 }

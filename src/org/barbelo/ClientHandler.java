@@ -4,10 +4,10 @@ import javax.microedition.io.*;
 import java.io.*;
 
 public class ClientHandler {
-	private SocketConnection	_s;
+	private StreamConnection	_s;
 	private DataOutputStream	_os;
 
-	public ClientHandler(SocketConnection s) throws Exception
+	public ClientHandler(StreamConnection s) throws Exception
 	{
 		_s      = s;
 		_os     = _s.openDataOutputStream();
