@@ -13,6 +13,7 @@ public class GPS implements LocationListener {
 
 		try {
 			Criteria cr = new Criteria();
+			cr.setSpeedAndCourseRequired(true);
 			_lp = LocationProvider.getInstance(cr);
 		} catch (Exception e) {
 			_gpsd.exception(e);
@@ -27,6 +28,7 @@ public class GPS implements LocationListener {
 	public void stop()
 	{
 		_lp.setLocationListener(null, -1, -1, -1);
+		_lp.reset();
 	}
 
 	public void locationUpdated(LocationProvider lp, Location location)

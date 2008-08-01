@@ -1,8 +1,7 @@
 package org.barbelo;
 
 import javax.microedition.io.*;
-import javax.bluetooth.LocalDevice;
-import javax.bluetooth.UUID;
+import javax.bluetooth.*;
 
 public class BTServer extends Server {
     private static final UUID GPS_SERVER_UUID =
@@ -23,6 +22,22 @@ public class BTServer extends Server {
 	url.append(";name=NMEA-GPS");
 	url.append(";authorize=false");
 
-	return (StreamConnectionNotifier) Connector.open(url.toString());
+	StreamConnectionNotifier s =
+	    (StreamConnectionNotifier) Connector.open(url.toString());
+
+	ServiceRecord sr = localDevice.getRecord(s);
+
+	/* Put it into public browse group */
+	DataElement dBrowseGroupList = new DataElement(DataElement.DATSEQ);
+	dBrowseGroupList.addElement(new DataElement(DataElement.UUID,
+		    new UUID(0x1002 /* PublicBrowseGroup */)));
+	sr.setAttributeValue(0x0005 /* BrowseGroupList */, dBrowseGroupList);
+
+	/* Set the Positioning service class bit */
+	sr.setDeviceServiceClasses(0x10000 /* Positioning */);
+
+	localDevice.updateRecord(sr);
+
+	return s;
     }
 }
