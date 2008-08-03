@@ -11,6 +11,7 @@ public class GPSd extends MIDlet implements CommandListener {
 	private Command		_cmdexit;
 	private Command		_cmdhide;
 	private Command		_cmdsettings;
+	private Command		_cmdabout;
 	private StringItem	_debug;
 	private StringItem	_latitude;
 	private StringItem	_longitude;
@@ -24,6 +25,7 @@ public class GPSd extends MIDlet implements CommandListener {
 		_form.addCommand(_cmdexit = new Command("Exit", Command.EXIT, 0));
 		_form.addCommand(_cmdhide = new Command("Hide", Command.SCREEN, 0));
 		_form.addCommand(_cmdsettings = new Command("Settings", Command.SCREEN, 0));
+		_form.addCommand(_cmdabout = new Command("About", Command.HELP, 0));
 		_form.setCommandListener(this);
 
 		_latitude	= new StringItem("Latitude", "");
@@ -67,6 +69,8 @@ public class GPSd extends MIDlet implements CommandListener {
 			notifyDestroyed();
 		} else if (c == _cmdsettings) {
 			_gs.push(new Settings(this), false);
+		} else if (c == _cmdabout) {
+			_gs.push(new About());
 		}
 	}
 
@@ -143,4 +147,13 @@ public class GPSd extends MIDlet implements CommandListener {
 	    start_servers();
 	    _gps.start();
 	}
+}
+
+class About extends Form {
+    About() {
+	super("About");
+	append("GPSd - an application that turns your internal GPS into a NMEA GPS for use with other applications and devices.\n");
+	append("This is free software. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
+       	append("For details, help and updates see the homepage:\nhttp://wiki.nomi.cz/gpsd:start");
+    }
 }
