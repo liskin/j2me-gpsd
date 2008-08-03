@@ -22,7 +22,14 @@ public class GPS implements LocationListener {
 
 	public void start()
 	{
-		_lp.setLocationListener(this, 1, 1, 1);
+		int interval = 1;
+		try {
+		    int i = Integer.parseInt(_gpsd._config.get("GPS_interval"));
+		    if (i > 0)
+			interval = i;
+		} catch (Exception e) {}
+
+		_lp.setLocationListener(this, interval, -1, -1);
 	}
 
 	public void stop()

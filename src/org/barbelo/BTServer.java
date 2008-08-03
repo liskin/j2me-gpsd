@@ -12,6 +12,11 @@ public class BTServer extends Server {
 	super(gpsd);
     }
 
+    public String serverName()
+    {
+	return "BTServer";
+    }
+
     StreamConnectionNotifier init() throws Exception
     {
 	LocalDevice localDevice = LocalDevice.getLocalDevice();

@@ -5,51 +5,47 @@ import javax.microedition.lcdui.*;
 import java.util.Vector;
 
 public class GPSd extends MIDlet implements CommandListener {
+	protected GUIStack	_gs;
 	private Form		_form;
 	private GPS		_gps;
-	private StringItem	_error;
+	private Command		_cmdexit;
+	private Command		_cmdhide;
+	private Command		_cmdsettings;
 	private StringItem	_debug;
 	private StringItem	_latitude;
 	private StringItem	_longitude;
 	private StringItem	_clients;
 	private Vector		_servers = new Vector();
-
-	private static final String HIDE = "Hide";
+	protected Config	_config = new Config();
 
 	public GPSd()
 	{
 		_form = new Form("GPSd");
-		_form.addCommand(new Command("Exit", Command.EXIT, 0));
-		_form.addCommand(new Command(HIDE, Command.SCREEN, 0));
+		_form.addCommand(_cmdexit = new Command("Exit", Command.EXIT, 0));
+		_form.addCommand(_cmdhide = new Command("Hide", Command.SCREEN, 0));
+		_form.addCommand(_cmdsettings = new Command("Settings", Command.SCREEN, 0));
 		_form.setCommandListener(this);
 
 		_latitude	= new StringItem("Latitude", "");
 		_longitude	= new StringItem("Longitude", "");
 		_clients	= new StringItem("Clients", "0");
-		_error		= new StringItem("Error", "none");
 		_debug		= new StringItem("Debug", "");
 
 		_form.append(_latitude);
 		_form.append(_longitude);
 		_form.append(_clients);
-		_form.append(_error);
 		_form.append(_debug);
 
 		_gps    = new GPS(this);
-		_servers.addElement(new SockServer(this));
-		_servers.addElement(new BTServer(this));
 	}
 
 	public void startApp()
 	{
-		Display.getDisplay(this).setCurrent(_form);
+		_config.load();
+		_gs = new GUIStack(Display.getDisplay(this), _form);
 
 		_gps.start();
-		for (int i = 0; i < _servers.size(); i++) {
-			Server s = (Server) _servers.elementAt(i);
-
-			s.start();
-		}
+		start_servers();
 	}
 
 	public void pauseApp()
@@ -62,31 +58,23 @@ public class GPSd extends MIDlet implements CommandListener {
 
 	public void commandAction(Command c, Displayable d)
 	{
-		if (c.getLabel().equals(HIDE)) {
-			Display.getDisplay(this).setCurrent(null);
-			return;
+		if (c == _cmdhide) {
+			_gs.hide();
+		} else if (c == _cmdexit) {
+			_gps.stop();
+			stop_servers();
+			destroyApp(false);
+			notifyDestroyed();
+		} else if (c == _cmdsettings) {
+			_gs.push(new Settings(this), false);
 		}
-
-		_gps.stop();
-
-		for (int i = 0; i < _servers.size(); i++) {
-			Server s = (Server) _servers.elementAt(i);
-
-			s.stop();
-			s.interrupt();
-			try {
-				s.join();
-			} catch (InterruptedException e) {
-			}
-		}
-
-		destroyApp(false);
-		notifyDestroyed();
 	}
 
 	public void exception(Exception e)
 	{
-		_error.setText(e.toString());
+		Alert alert = new Alert("Error", e.toString(), null, AlertType.ERROR);
+		alert.setTimeout(Alert.FOREVER);
+		_gs.pushAlert(alert);
 	}
 
 	public void debug(String msg)
@@ -118,5 +106,41 @@ public class GPSd extends MIDlet implements CommandListener {
 		}
 
 		_clients.setText((new Integer(clients)).toString());
+	}
+
+	private void start_servers()
+	{
+		_servers.addElement(new SockServer(this));
+		_servers.addElement(new BTServer(this));
+
+		for (int i = 0; i < _servers.size(); i++) {
+			Server s = (Server) _servers.elementAt(i);
+
+			if (!"0".equals(_config.get(s.serverName())))
+			    s.start();
+		}
+	}
+
+	private void stop_servers()
+	{
+		for (int i = 0; i < _servers.size(); i++) {
+			Server s = (Server) _servers.elementAt(i);
+
+			s.stop();
+			s.interrupt();
+			try {
+				s.join();
+			} catch (InterruptedException e) {
+			}
+		}
+
+		_servers.removeAllElements();
+	}
+
+	public void reconfigure()
+	{
+	    stop_servers();
+	    start_servers();
+	    _gps.start();
 	}
 }

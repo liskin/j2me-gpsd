@@ -4,16 +4,16 @@ import javax.microedition.io.*;
 import java.util.*;
 
 public abstract class Server extends Thread {
-	private GPSd			_gpsd;
-	private boolean			_running;
-	private StreamConnectionNotifier	_sock;
-	private Vector			_clients;
+	protected GPSd			_gpsd;
+	private boolean			_running = false;
+	private StreamConnectionNotifier	_sock = null;
+	private Vector			_clients = new Vector();
+
+	abstract public String serverName();
 
 	public Server(GPSd gpsd)
 	{
 		_gpsd    = gpsd;
-		_running = true;
-		_clients = new Vector();
 	}
 
 	private synchronized boolean running()
@@ -26,7 +26,10 @@ public abstract class Server extends Thread {
 		_running = false;
 
 		try {
-			_sock.close();
+			if (_sock != null) {
+				_sock.close();
+				_sock = null;
+			}
 		} catch (Exception e) {
 		}
 
@@ -35,6 +38,9 @@ public abstract class Server extends Thread {
 
 			c.kill();
 		}
+
+		_clients.removeAllElements();
+		_gpsd.update_client_count();
 	}
 
 	public void update_location(String nmea)
@@ -62,6 +68,8 @@ public abstract class Server extends Thread {
 
 	public void run()
 	{
+		_running = true;
+
 		try {
 			_sock = init();
 		} catch (Exception e) {
