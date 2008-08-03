@@ -25,7 +25,7 @@ public class GPS implements LocationListener {
 		int interval = 1;
 		try {
 		    int i = Integer.parseInt(_gpsd._config.get("GPS_interval"));
-		    if (i > 0)
+		    if (i != 0)
 			interval = i;
 		} catch (Exception e) {}
 
