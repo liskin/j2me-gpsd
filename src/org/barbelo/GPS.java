@@ -11,9 +11,14 @@ public class GPS implements LocationListener {
 	{
 		_gpsd = gpsd;
 
+		boolean costallowed = true;
+		if ("0".equals(_gpsd._config.get("GPS_costallowed")))
+		    costallowed = false;
+
 		try {
 			Criteria cr = new Criteria();
 			cr.setSpeedAndCourseRequired(true);
+			cr.setCostAllowed(costallowed);
 			_lp = LocationProvider.getInstance(cr);
 		} catch (Exception e) {
 			_gpsd.exception(e);

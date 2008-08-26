@@ -4,7 +4,7 @@ import javax.microedition.lcdui.*;
 
 class Settings extends Form implements CommandListener {
     private GPSd gpsd;
-    private Item[] it = new Item[4];
+    private Item[] it = new Item[5];
     private Command exit;
 
     private static String onoff[] = { "disabled", "enabled" };
@@ -31,6 +31,9 @@ class Settings extends Form implements CommandListener {
 	String GPS_interval = gpsd._config.get("GPS_interval");
 	it[3] = new TextField("GPS update interval", GPS_interval != null ? GPS_interval : "1", 3,
 		TextField.NUMERIC);
+	
+	it[4] = new ChoiceGroup("GPS cost allowed", ChoiceGroup.POPUP, onoff, null);
+	((ChoiceGroup) it[4]).setSelectedIndex("0".equals(gpsd._config.get("GPS_costallowed")) ? 0 : 1, true);
 
 	for (int i = 0; i < it.length; i++)
 	    append(it[i]);
@@ -43,6 +46,7 @@ class Settings extends Form implements CommandListener {
 	    gpsd._config.set("SockServer", Integer.toString(((ChoiceGroup) it[1]).getSelectedIndex()));
 	    gpsd._config.set("SockServer_port", ((TextField) it[2]).getString());
 	    gpsd._config.set("GPS_interval", ((TextField) it[3]).getString());
+	    gpsd._config.set("GPS_costallowed", Integer.toString(((ChoiceGroup) it[4]).getSelectedIndex()));
 
 	    gpsd._gs.pop();
 	    gpsd.reconfigure();
